@@ -1,0 +1,19 @@
+<view wx:if="{{loading}}" class="detail-loading">正在加载模板…</view>
+<view wx:else class="detail-page">
+  <view class="detail-preview {{template.artClass}}"></view>
+  <view class="detail-content">
+    <view class="detail-title">{{template.name}}</view>
+    <view class="detail-version">官方模板 · 当前版本 {{template.versionNumber}}.0</view>
+    <view class="detail-facts">
+      <text>需要 {{template.inputCount}} 张图片</text>
+      <text>{{template.usageCount}} 人用过</text>
+    </view>
+    <view class="detail-section-title">支持比例</view>
+    <view class="ratio-list">
+      <text wx:for="{{template.ratios}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+  <view class="detail-footer">
+    <button class="primary-button" bindtap="useTemplate">使用这个模板</button>
+  </view>
+</view>

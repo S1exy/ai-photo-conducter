@@ -1,0 +1,18 @@
+<view class="page-shell tasks-page">
+  <view class="tasks-title">生成任务</view>
+  <view wx:if="{{!tasks.length}}" class="tasks-empty">
+    <view class="tasks-empty-icon">◇</view>
+    <view>还没有生成任务</view>
+    <view class="muted">选择一个模板开始创作</view>
+  </view>
+  <view wx:else>
+    <view wx:for="{{tasks}}" wx:key="id" class="task-card">
+      <image class="task-image" src="{{item.displayImagePath}}" mode="aspectFill"></image>
+      <view class="task-info">
+        <view class="task-name">{{item.templateName}}</view>
+        <view class="task-ratio">{{item.aspectRatio}}</view>
+        <view class="task-status {{item.status === 'SUCCEEDED' ? 'done' : ''}}">{{item.statusLabel}}</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,30 @@
+{
+    "description": "AI image template community mini program",
+    "miniprogramRoot": "miniprogram/",
+    "projectname": "ai-image-template-miniapp",
+    "appid": "touristappid",
+    "setting": {
+        "useCompilerPlugins": false,
+        "es6": true,
+        "postcss": true,
+        "minified": true,
+        "urlCheck": false,
+        "babelSetting": {
+            "ignore": [],
+            "disablePlugins": [],
+            "outputPath": ""
+        }
+    },
+    "compileType": "miniprogram",
+    "libVersion": "3.7.12",
+    "srcMiniprogramRoot": "miniprogram/",
+    "packOptions": {
+        "ignore": [],
+        "include": []
+    },
+    "condition": {},
+    "editorSetting": {
+        "tabIndent": "insertSpaces",
+        "tabSize": 4
+    }
+}

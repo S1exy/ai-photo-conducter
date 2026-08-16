@@ -1,0 +1,12 @@
+.profile-head { padding: 60rpx 0 36rpx; text-align: center; }
+.profile-avatar { width: 132rpx; height: 132rpx; display: flex; align-items: center; justify-content: center; margin: 0 auto 20rpx; border-radius: 50%; background: linear-gradient(145deg, #bfe5d6, #d7c9f5); color: #315f4c; font-size: 36rpx; }
+.profile-name { font-size: 34rpx; font-weight: 600; }
+.profile-head .muted { margin-top: 8rpx; font-size: 23rpx; }
+.profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14rpx; }
+.profile-stat { padding: 24rpx 8rpx; border-radius: 24rpx; background: #ffffff; text-align: center; }
+.profile-stat-value, .profile-stat-label { display: block; }
+.profile-stat-value { font-size: 34rpx; font-weight: 600; }
+.profile-stat-label { margin-top: 6rpx; color: #77837c; font-size: 22rpx; }
+.profile-menu { margin-top: 28rpx; overflow: hidden; border-radius: 26rpx; background: #ffffff; }
+.profile-row { display: flex; justify-content: space-between; padding: 30rpx 26rpx; border-bottom: 2rpx solid #edf1ee; }
+.profile-row:last-child { border-bottom: 0; }

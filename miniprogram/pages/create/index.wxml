@@ -1,0 +1,40 @@
+<view class="page-shell create-page">
+  <view class="section-title">选择模板</view>
+  <scroll-view class="template-strip" scroll-x>
+    <view
+      wx:for="{{templates}}"
+      wx:key="id"
+      class="template-choice {{template.id === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="chooseTemplate"
+    >
+      <view class="template-thumb {{item.artClass}}"></view>
+      <text>{{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <view class="selected-template">已关联模板：{{template.name}}</view>
+
+  <view class="section-title">上传 1 张参考图</view>
+  <view class="upload-box" bindtap="chooseImage">
+    <image wx:if="{{selectedImagePath}}" src="{{selectedImagePath}}" mode="aspectFill"></image>
+    <view wx:else>
+      <view class="upload-plus">＋</view>
+      <view>从相册选择或拍摄</view>
+    </view>
+  </view>
+
+  <view class="section-title">选择比例</view>
+  <view class="ratio-list">
+    <view
+      wx:for="{{template.ratios}}"
+      wx:key="*this"
+      class="ratio-choice {{selectedRatio === item ? 'active' : ''}}"
+      data-ratio="{{item}}"
+      bindtap="chooseRatio"
+    >{{item}}</view>
+  </view>
+
+  <view class="create-hint">无需填写文字，系统会按模板自动生成。</view>
+  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitGeneration">开始生成</button>
+</view>

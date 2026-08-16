@@ -1,0 +1,13 @@
+{
+  "desc": "Public pages for the mini program",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/feed/index"
+    },
+    {
+      "action": "allow",
+      "page": "pages/template/detail"
+    }
+  ]
+}

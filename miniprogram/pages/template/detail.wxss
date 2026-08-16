@@ -1,0 +1,15 @@
+.detail-page { padding-bottom: 132rpx; }
+.detail-loading { padding: 160rpx 0; text-align: center; color: #77837c; }
+.detail-preview { height: 760rpx; margin: 24rpx; border-radius: 36rpx; }
+.detail-preview.editorial { background: linear-gradient(180deg, #eee6d7 0 61%, #bdceef 61%); }
+.detail-preview.pet { background: radial-gradient(circle at 50% 42%, #f2d684 0 18%, #d19de2 19% 44%, #8bd8c4 45%); }
+.detail-preview.city { background: linear-gradient(145deg, #91d5ee, #f1af9c); }
+.detail-preview.poster { background: linear-gradient(160deg, #2b385c, #e3574d); }
+.detail-content { padding: 0 30rpx; }
+.detail-title { font-size: 40rpx; font-weight: 600; }
+.detail-version { margin-top: 10rpx; color: #77837c; font-size: 24rpx; }
+.detail-facts { display: flex; gap: 16rpx; margin-top: 24rpx; }
+.detail-facts text, .ratio-list text { padding: 12rpx 18rpx; border-radius: 999rpx; background: #e9efeb; font-size: 23rpx; }
+.detail-section-title { margin-top: 36rpx; font-weight: 600; }
+.ratio-list { display: flex; gap: 14rpx; margin-top: 18rpx; }
+.detail-footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 18rpx 24rpx 28rpx; background: #ffffff; }

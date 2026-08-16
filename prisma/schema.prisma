@@ -1,0 +1,442 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  INVITED_CREATOR
+  OPERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  DELETED
+}
+
+enum TemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+  REMOVED
+}
+
+enum TemplateVersionStatus {
+  DRAFT
+  PUBLISHED
+  RETIRED
+}
+
+enum AssetKind {
+  USER_INPUT
+  GENERATED_OUTPUT
+  TEMPLATE_COVER
+  TEMPLATE_PREVIEW
+  USER_AVATAR
+}
+
+enum SafetyStatus {
+  NOT_CHECKED
+  PENDING
+  APPROVED
+  REJECTED
+  MANUAL_REVIEW
+}
+
+enum GenerationStatus {
+  CREATED
+  QUEUED
+  RUNNING
+  RETRYING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  EXPIRED
+}
+
+enum CreationStatus {
+  DRAFT
+  DELETED
+}
+
+enum PublicationStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  WITHDRAWN
+  REMOVED
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum ReviewTargetType {
+  INPUT_ASSET
+  OUTPUT_ASSET
+  PUBLICATION
+}
+
+enum ReviewStatus {
+  PENDING
+  RUNNING
+  APPROVED
+  REJECTED
+  MANUAL_REVIEW
+  FAILED
+}
+
+enum PointTransactionType {
+  GRANT
+  RESERVE
+  CONSUME
+  RELEASE
+  REFUND
+  ADJUST
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  FAILED
+}
+
+model User {
+  id                 String              @id @default(uuid()) @db.Uuid
+  openid             String              @unique @db.VarChar(128)
+  unionid            String?             @unique @db.VarChar(128)
+  systemNickname     String              @unique @map("system_nickname") @db.VarChar(32)
+  avatarAssetId      String?             @map("avatar_asset_id") @db.Uuid
+  role               UserRole            @default(USER)
+  status             UserStatus          @default(ACTIVE)
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  deletedAt          DateTime?           @map("deleted_at")
+  avatarAsset        Asset?              @relation("UserAvatar", fields: [avatarAssetId], references: [id], onDelete: SetNull)
+  assets             Asset[]             @relation("AssetCreator")
+  templates          Template[]
+  generationJobs     GenerationJob[]
+  creations          Creation[]
+  publications       Publication[]
+  workLikes          WorkLike[]
+  workBookmarks      WorkBookmark[]
+  templateBookmarks  TemplateBookmark[]
+  reports            Report[]
+  pointAccount       PointAccount?
+  pointTransactions  PointLedger[]
+  creatorInvitations CreatorInvitation[] @relation("InvitedCreator")
+
+  @@index([status, createdAt(sort: Desc)])
+  @@map("users")
+}
+
+model Template {
+  id             String             @id @default(uuid()) @db.Uuid
+  ownerUserId    String?            @map("owner_user_id") @db.Uuid
+  name           String             @db.VarChar(80)
+  coverAssetId   String?            @map("cover_asset_id") @db.Uuid
+  status         TemplateStatus     @default(DRAFT)
+  sortOrder      Int                @default(0) @map("sort_order")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+  deletedAt      DateTime?          @map("deleted_at")
+  owner          User?              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  coverAsset     Asset?             @relation("TemplateCover", fields: [coverAssetId], references: [id], onDelete: SetNull)
+  versions       TemplateVersion[]
+  generationJobs GenerationJob[]
+  creations      Creation[]
+  publications   Publication[]
+  bookmarks      TemplateBookmark[]
+  reports        Report[]
+
+  @@index([status, sortOrder, createdAt(sort: Desc)])
+  @@index([ownerUserId, status])
+  @@map("templates")
+}
+
+model TemplateVersion {
+  id             String                @id @default(uuid()) @db.Uuid
+  templateId     String                @map("template_id") @db.Uuid
+  versionNumber  Int                   @map("version_number")
+  inputSchema    Json                  @map("input_schema")
+  renderConfig   Json                  @map("render_config")
+  modelConfig    Json                  @map("model_config")
+  outputSpecs    Json                  @map("output_specs")
+  previewAssetId String?               @map("preview_asset_id") @db.Uuid
+  checksum       String                @db.Char(64)
+  status         TemplateVersionStatus @default(DRAFT)
+  createdAt      DateTime              @default(now()) @map("created_at")
+  publishedAt    DateTime?             @map("published_at")
+  template       Template              @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  previewAsset   Asset?                @relation("TemplatePreview", fields: [previewAssetId], references: [id], onDelete: SetNull)
+  generationJobs GenerationJob[]
+  creations      Creation[]
+  publications   Publication[]
+
+  @@unique([templateId, versionNumber])
+  @@index([templateId, status, versionNumber(sort: Desc)])
+  @@map("template_versions")
+}
+
+model Asset {
+  id                 String              @id @default(uuid()) @db.Uuid
+  storageKey         String              @unique @map("storage_key") @db.VarChar(512)
+  kind               AssetKind
+  mimeType           String              @map("mime_type") @db.VarChar(100)
+  width              Int?
+  height             Int?
+  byteSize           BigInt              @map("byte_size")
+  sha256             String              @db.Char(64)
+  createdByUserId    String?             @map("created_by_user_id") @db.Uuid
+  safetyStatus       SafetyStatus        @default(NOT_CHECKED) @map("safety_status")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  deletedAt          DateTime?           @map("deleted_at")
+  createdBy          User?               @relation("AssetCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  avatars            User[]              @relation("UserAvatar")
+  templateCovers     Template[]          @relation("TemplateCover")
+  templatePreviews   TemplateVersion[]   @relation("TemplatePreview")
+  generationInputs   GenerationJob[]     @relation("GenerationInput")
+  generationOutputs  GenerationJob[]     @relation("GenerationOutput")
+  creationInputs     Creation[]          @relation("CreationInput")
+  creationOutputs    Creation[]          @relation("CreationOutput")
+  moderationRequests ModerationRequest[]
+
+  @@index([createdByUserId, kind, createdAt(sort: Desc)])
+  @@index([safetyStatus, createdAt])
+  @@index([sha256])
+  @@map("assets")
+}
+
+model GenerationJob {
+  id                 String           @id @default(uuid()) @db.Uuid
+  userId             String           @map("user_id") @db.Uuid
+  templateId         String           @map("template_id") @db.Uuid
+  templateVersionId  String           @map("template_version_id") @db.Uuid
+  inputAssetId       String           @map("input_asset_id") @db.Uuid
+  outputAssetId      String?          @map("output_asset_id") @db.Uuid
+  sourceJobId        String?          @map("source_job_id") @db.Uuid
+  aspectRatio        String           @map("aspect_ratio") @db.VarChar(16)
+  provider           String           @default("mock") @db.VarChar(40)
+  providerJobId      String?          @map("provider_job_id") @db.VarChar(200)
+  status             GenerationStatus @default(CREATED)
+  attempt            Int              @default(0)
+  idempotencyKey     String           @unique @map("idempotency_key") @db.VarChar(128)
+  billingEnabled     Boolean          @default(false) @map("billing_enabled")
+  pointsCostSnapshot Int              @default(0) @map("points_cost_snapshot")
+  failureCode        String?          @map("failure_code") @db.VarChar(64)
+  createdAt          DateTime         @default(now()) @map("created_at")
+  startedAt          DateTime?        @map("started_at")
+  finishedAt         DateTime?        @map("finished_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  user               User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  template           Template         @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion    TemplateVersion  @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  inputAsset         Asset            @relation("GenerationInput", fields: [inputAssetId], references: [id], onDelete: Restrict)
+  outputAsset        Asset?           @relation("GenerationOutput", fields: [outputAssetId], references: [id], onDelete: Restrict)
+  sourceJob          GenerationJob?   @relation("RegenerationChain", fields: [sourceJobId], references: [id], onDelete: Restrict)
+  regeneratedJobs    GenerationJob[]  @relation("RegenerationChain")
+  creation           Creation?
+  pointTransactions  PointLedger[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, updatedAt])
+  @@index([templateVersionId, createdAt(sort: Desc)])
+  @@index([provider, providerJobId])
+  @@map("generation_jobs")
+}
+
+model Creation {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  generationJobId   String          @unique @map("generation_job_id") @db.Uuid
+  templateId        String          @map("template_id") @db.Uuid
+  templateVersionId String          @map("template_version_id") @db.Uuid
+  inputAssetId      String          @map("input_asset_id") @db.Uuid
+  outputAssetId     String          @map("output_asset_id") @db.Uuid
+  parentCreationId  String?         @map("parent_creation_id") @db.Uuid
+  status            CreationStatus  @default(DRAFT)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  deletedAt         DateTime?       @map("deleted_at")
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  generationJob     GenerationJob   @relation(fields: [generationJobId], references: [id], onDelete: Restrict)
+  template          Template        @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion   TemplateVersion @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  inputAsset        Asset           @relation("CreationInput", fields: [inputAssetId], references: [id], onDelete: Restrict)
+  outputAsset       Asset           @relation("CreationOutput", fields: [outputAssetId], references: [id], onDelete: Restrict)
+  parentCreation    Creation?       @relation("CreationHistory", fields: [parentCreationId], references: [id], onDelete: Restrict)
+  childCreations    Creation[]      @relation("CreationHistory")
+  publication       Publication?
+
+  @@index([userId, status, createdAt(sort: Desc)])
+  @@index([templateVersionId, createdAt(sort: Desc)])
+  @@map("creations")
+}
+
+model Publication {
+  id                 String              @id @default(uuid()) @db.Uuid
+  creationId         String              @unique @map("creation_id") @db.Uuid
+  userId             String              @map("user_id") @db.Uuid
+  templateId         String              @map("template_id") @db.Uuid
+  templateVersionId  String              @map("template_version_id") @db.Uuid
+  status             PublicationStatus   @default(PENDING_REVIEW)
+  reviewReasonCode   String?             @map("review_reason_code") @db.VarChar(64)
+  publishedAt        DateTime?           @map("published_at")
+  withdrawnAt        DateTime?           @map("withdrawn_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  creation           Creation            @relation(fields: [creationId], references: [id], onDelete: Restrict)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  template           Template            @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion    TemplateVersion     @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  likes              WorkLike[]
+  bookmarks          WorkBookmark[]
+  reports            Report[]
+  moderationRequests ModerationRequest[]
+
+  @@index([status, publishedAt(sort: Desc), id])
+  @@index([templateId, status, publishedAt(sort: Desc)])
+  @@index([userId, status, createdAt(sort: Desc)])
+  @@map("publications")
+}
+
+model WorkLike {
+  userId        String      @map("user_id") @db.Uuid
+  publicationId String      @map("publication_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at")
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, publicationId])
+  @@index([publicationId, createdAt(sort: Desc)])
+  @@map("work_likes")
+}
+
+model WorkBookmark {
+  userId        String      @map("user_id") @db.Uuid
+  publicationId String      @map("publication_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at")
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, publicationId])
+  @@index([publicationId, createdAt(sort: Desc)])
+  @@map("work_bookmarks")
+}
+
+model TemplateBookmark {
+  userId     String   @map("user_id") @db.Uuid
+  templateId String   @map("template_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@id([userId, templateId])
+  @@index([templateId, createdAt(sort: Desc)])
+  @@map("template_bookmarks")
+}
+
+model Report {
+  id             String       @id @default(uuid()) @db.Uuid
+  reporterUserId String       @map("reporter_user_id") @db.Uuid
+  publicationId  String?      @map("publication_id") @db.Uuid
+  templateId     String?      @map("template_id") @db.Uuid
+  reasonCode     String       @map("reason_code") @db.VarChar(40)
+  status         ReportStatus @default(OPEN)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  resolvedAt     DateTime?    @map("resolved_at")
+  reporter       User         @relation(fields: [reporterUserId], references: [id], onDelete: Restrict)
+  publication    Publication? @relation(fields: [publicationId], references: [id], onDelete: Restrict)
+  template       Template?    @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([publicationId, status])
+  @@index([templateId, status])
+  @@map("reports")
+}
+
+model ModerationRequest {
+  id                String           @id @default(uuid()) @db.Uuid
+  targetType        ReviewTargetType @map("target_type")
+  assetId           String?          @map("asset_id") @db.Uuid
+  publicationId     String?          @map("publication_id") @db.Uuid
+  provider          String           @default("mock") @db.VarChar(40)
+  providerRequestId String?          @map("provider_request_id") @db.VarChar(200)
+  status            ReviewStatus     @default(PENDING)
+  reasonCode        String?          @map("reason_code") @db.VarChar(64)
+  attempt           Int              @default(0)
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  asset             Asset?           @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  publication       Publication?     @relation(fields: [publicationId], references: [id], onDelete: Restrict)
+
+  @@index([status, updatedAt])
+  @@index([provider, providerRequestId])
+  @@map("moderation_requests")
+}
+
+model PointAccount {
+  userId          String   @id @map("user_id") @db.Uuid
+  availablePoints Int      @default(0) @map("available_points")
+  frozenPoints    Int      @default(0) @map("frozen_points")
+  version         Int      @default(0)
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("point_accounts")
+}
+
+model PointLedger {
+  id              String               @id @default(uuid()) @db.Uuid
+  userId          String               @map("user_id") @db.Uuid
+  generationJobId String?              @map("generation_job_id") @db.Uuid
+  transactionType PointTransactionType @map("transaction_type")
+  amount          Int
+  idempotencyKey  String               @unique @map("idempotency_key") @db.VarChar(128)
+  createdAt       DateTime             @default(now()) @map("created_at")
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  generationJob   GenerationJob?       @relation(fields: [generationJobId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([generationJobId, transactionType])
+  @@map("point_ledger")
+}
+
+model CreatorInvitation {
+  id             String    @id @default(uuid()) @db.Uuid
+  inviteCodeHash String    @unique @map("invite_code_hash") @db.Char(64)
+  invitedUserId  String?   @map("invited_user_id") @db.Uuid
+  expiresAt      DateTime  @map("expires_at")
+  acceptedAt     DateTime? @map("accepted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  invitedUser    User?     @relation("InvitedCreator", fields: [invitedUserId], references: [id], onDelete: SetNull)
+
+  @@index([expiresAt, acceptedAt])
+  @@map("creator_invitations")
+}
+
+model OutboxEvent {
+  id          String       @id @default(uuid()) @db.Uuid
+  topic       String       @db.VarChar(100)
+  aggregateId String       @map("aggregate_id") @db.VarChar(100)
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0)
+  availableAt DateTime     @default(now()) @map("available_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  deliveredAt DateTime?    @map("delivered_at")
+
+  @@index([status, availableAt])
+  @@index([topic, aggregateId])
+  @@map("outbox_events")
+}

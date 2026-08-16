@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/feed/index",
+    "pages/create/index",
+    "pages/tasks/index",
+    "pages/profile/index",
+    "pages/template/detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "灵感接力",
+    "navigationBarBackgroundColor": "#F8FAF8",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F8FAF8"
+  },
+  "tabBar": {
+    "color": "#7A867F",
+    "selectedColor": "#1D4F3D",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/feed/index",
+        "text": "发现"
+      },
+      {
+        "pagePath": "pages/create/index",
+        "text": "创作"
+      },
+      {
+        "pagePath": "pages/tasks/index",
+        "text": "任务"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}
