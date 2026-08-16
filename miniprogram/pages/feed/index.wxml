@@ -23,7 +23,7 @@
       wx:for="{{works}}"
       wx:key="id"
       class="work-card"
-      data-template-id="{{item.templateId}}"
+      data-publication-id="{{item.id}}"
       bindtap="openTemplate"
     >
       <image class="work-art {{item.heightClass}}" src="{{item.imagePath}}" mode="aspectFill"></image>

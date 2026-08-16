@@ -113,4 +113,31 @@ module.exports = {
     const works = await request({ url: '/publications/feed' });
     return works.map((work) => ({ ...work, imagePath: absoluteUrl(work.imagePath) }));
   },
+  async getFeedBySort(sort) {
+    const works = await request({ url: `/publications/feed?sort=${sort}` });
+    return works.map((work) => ({ ...work, imagePath: absoluteUrl(work.imagePath) }));
+  },
+  async getPublication(id) {
+    const work = await authorizedRequest({ url: `/publications/${id}` });
+    return { ...work, imagePath: absoluteUrl(work.imagePath) };
+  },
+  likePublication(id, liked) {
+    return authorizedRequest({ url: `/publications/${id}/like`, method: liked ? 'DELETE' : 'POST' });
+  },
+  bookmarkPublication(id, bookmarked) {
+    return authorizedRequest({ url: `/publications/${id}/bookmark`, method: bookmarked ? 'DELETE' : 'POST' });
+  },
+  reportPublication(id, reasonCode) {
+    return authorizedRequest({ url: `/publications/${id}/reports`, method: 'POST', data: { reasonCode } });
+  },
+  bookmarkTemplate(id, bookmarked) {
+    return authorizedRequest({ url: `/templates/${id}/bookmark`, method: bookmarked ? 'DELETE' : 'POST' });
+  },
+  async getBookmarks() {
+    const result = await authorizedRequest({ url: '/bookmarks' });
+    return {
+      works: result.works.map((work) => ({ ...work, imagePath: absoluteUrl(work.imagePath) })),
+      templates: result.templates,
+    };
+  },
 };

@@ -20,7 +20,8 @@ Page({
     this.setData({ loading: true });
     try {
       const heights = ['tall', 'short', 'medium'];
-      const works = (await api.getFeed()).map((work, index) => ({
+      const sort = this.data.activeTab === '最新' ? 'latest' : 'recommended';
+      const works = (await api.getFeedBySort(sort)).map((work, index) => ({
         ...work,
         heightClass: heights[index % heights.length],
       }));
@@ -33,11 +34,12 @@ Page({
 
   selectTab(event) {
     this.setData({ activeTab: event.currentTarget.dataset.tab });
+    if (event.currentTarget.dataset.tab !== '模板') this.loadFeed();
   },
 
   openTemplate(event) {
     wx.navigateTo({
-      url: `/pages/template/detail?id=${event.currentTarget.dataset.templateId}`,
+      url: `/pages/work/detail?id=${event.currentTarget.dataset.publicationId}`,
     });
   },
 });

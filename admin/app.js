@@ -13,6 +13,7 @@ const reasons = {
   COPYRIGHT_RISK: '侵权风险',
   LOW_QUALITY: '图片质量不符合公开要求',
   OTHER_PLATFORM_RULES: '其他平台规则原因',
+  UNCOMFORTABLE: '令人不适',
 };
 
 const hints = {
@@ -20,6 +21,7 @@ const hints = {
   PUBLISHED: '已经进入公开作品流的内容',
   REJECTED: '审核未通过且不能原样再次提交的内容',
   WITHDRAWN: '用户主动撤回的发布申请或公开作品',
+  REPORTS: '等待运营人员处理的用户举报',
 };
 
 async function request(path, options = {}) {
@@ -93,6 +95,41 @@ function createCard(item) {
   return card;
 }
 
+function createReportCard(item) {
+  const publication = item.publication;
+  const card = document.createElement('article');
+  card.className = 'review-card report-card';
+  card.innerHTML = `
+    <div class="images">
+      <div class="image-box"><span class="image-label">被举报作品</span><img class="output-image" alt="被举报作品" /></div>
+    </div>
+    <div class="review-info">
+      <span class="status-pill">OPEN REPORT</span>
+      <h3>${publication?.template?.name || item.template?.name || '举报记录'}</h3>
+      <div class="meta">举报人：${item.reporter.systemNickname}<br />作品作者：${publication?.user?.systemNickname || '—'}<br />举报时间：${new Date(item.createdAt).toLocaleString()}</div>
+      <div class="reason">${reasons[item.reasonCode] || item.reasonCode}</div>
+      <div class="actions"><div class="action-row">
+        <button class="reject dismiss-report">驳回举报</button>
+        <button class="approve remove-publication">确认违规并下架</button>
+      </div></div>
+    </div>`;
+  if (publication?.creation?.outputAssetId) {
+    loadProtectedImage(`/api/v1/admin/assets/${publication.creation.outputAssetId}/file`, card.querySelector('.output-image'));
+  }
+  card.querySelector('.dismiss-report').addEventListener('click', () => handleReport(item.id, 'dismiss'));
+  card.querySelector('.remove-publication').addEventListener('click', () => handleReport(item.id, 'remove-publication'));
+  return card;
+}
+
+async function handleReport(id, action) {
+  try {
+    await request(`/admin/reports/${id}/${action}`, { method: 'POST' });
+    await loadReviews();
+  } catch (error) {
+    window.alert(error.message);
+  }
+}
+
 async function review(id, action, card) {
   const button = card.querySelector(`.${action}`);
   button.disabled = true;
@@ -113,11 +150,13 @@ async function loadReviews() {
   const list = document.getElementById('reviewList');
   list.innerHTML = '';
   try {
-    const items = await request(`/admin/reviews?status=${state.status}`);
+    const items = state.status === 'REPORTS'
+      ? await request('/admin/reports')
+      : await request(`/admin/reviews?status=${state.status}`);
     document.getElementById('itemCount').textContent = String(items.length);
     document.getElementById('statusHint').textContent = hints[state.status];
     document.getElementById('emptyState').classList.toggle('hidden', items.length > 0);
-    items.forEach((item) => list.appendChild(createCard(item)));
+    items.forEach((item) => list.appendChild(state.status === 'REPORTS' ? createReportCard(item) : createCard(item)));
   } catch (error) {
     if (/token|access|expired|operator/i.test(error.message)) logout();
     else window.alert(error.message);

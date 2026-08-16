@@ -71,10 +71,45 @@ export class AdminService {
       orderBy: { createdAt: 'asc' },
       include: {
         reporter: { select: { systemNickname: true } },
-        publication: { select: { id: true, status: true } },
+        publication: {
+          select: {
+            id: true, status: true,
+            creation: { select: { outputAssetId: true } },
+            user: { select: { systemNickname: true } },
+            template: { select: { name: true } },
+          },
+        },
         template: { select: { id: true, name: true } },
       },
       take: 100,
+    });
+  }
+
+  async dismissReport(reportId: string) {
+    const result = await this.prisma.report.updateMany({
+      where: { id: reportId, status: ReportStatus.OPEN },
+      data: { status: ReportStatus.DISMISSED, resolvedAt: new Date() },
+    });
+    if (!result.count) throw new ConflictException('Report is not open');
+    return { status: ReportStatus.DISMISSED };
+  }
+
+  async removeReportedPublication(reportId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const report = await tx.report.findFirst({
+        where: { id: reportId, status: ReportStatus.OPEN, publicationId: { not: null } },
+      });
+      if (!report?.publicationId) throw new NotFoundException('Open publication report not found');
+      const removed = await tx.publication.updateMany({
+        where: { id: report.publicationId, status: PublicationStatus.PUBLISHED },
+        data: { status: PublicationStatus.REMOVED },
+      });
+      if (!removed.count) throw new ConflictException('Publication is not published');
+      await tx.report.updateMany({
+        where: { publicationId: report.publicationId, status: ReportStatus.OPEN },
+        data: { status: ReportStatus.RESOLVED, resolvedAt: new Date() },
+      });
+      return { status: PublicationStatus.REMOVED };
     });
   }
 

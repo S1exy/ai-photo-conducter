@@ -1,6 +1,6 @@
 # AI 图片模板小程序
 
-模板驱动的微信原生小程序与 NestJS API MVP。小程序已接通登录、模板、图片上传、异步生成、私人作品、人工发布审核、公开流和任务轮询。当前生成适配器会复制输入图作为 Mock 输出，积分功能关闭；真实模型、自动审核供应商和 AppID 后续接入。
+模板驱动的微信原生小程序与 NestJS API MVP。小程序已接通登录、模板、图片上传、异步生成、私人作品、人工发布审核、公开流、作品互动、私人收藏、预设举报和任务轮询。当前生成适配器会复制输入图作为 Mock 输出，积分功能关闭；真实模型、自动审核供应商和 AppID 后续接入。
 
 ## 技术栈
 
@@ -48,6 +48,7 @@ npm run db:start:local
 ```bash
 npm run test:smoke
 npm run test:review-smoke
+npm run test:engagement-smoke
 ```
 
 本地运营审核后台：`http://127.0.0.1:3000/admin/`。使用 `.env` 中的 `ADMIN_LOCAL_PASSWORD` 登录；该入口只在开发登录开启时可用。
@@ -65,7 +66,13 @@ GET /api/v1/generations
 GET /api/v1/creations
 POST /api/v1/creations/:id/publication
 GET /api/v1/publications/feed
+GET /api/v1/publications/:id
+POST /api/v1/publications/:id/like
+POST /api/v1/publications/:id/bookmark
+POST /api/v1/publications/:id/reports
+GET /api/v1/bookmarks
 GET /api/v1/admin/reviews
+GET /api/v1/admin/reports
 ```
 
 `ready` 会同时检查 PostgreSQL 和本地存储目录是否可用。
@@ -80,6 +87,8 @@ GET /api/v1/admin/reviews
 
 - 用户不能输入 Prompt、标题、正文、评论或自由标签。
 - 每个生成任务必须绑定模板版本。
+- “使用同款”必须绑定原作品使用的同一模板版本，并记录来源作品。
+- 模板目录展示与生成开关相互独立；隐藏模板仍可被旧作品继续使用，只有安全或技术停用才禁止生成。
 - 一次上传一张图，一次生成一张图。
 - 作品默认是私人草稿，审核通过后才能进入公开流。
 - `BILLING_ENABLED=false` 时积分不参与任务校验或扣除。

@@ -53,7 +53,9 @@ Page({
         templateVersionId: this.data.template.versionId,
         inputAssetId: asset.id,
         aspectRatio: this.data.selectedRatio,
+        sourcePublicationId: getApp().globalData.sourcePublicationId || undefined,
       });
+      getApp().globalData.sourcePublicationId = '';
       wx.switchTab({ url: '/pages/tasks/index' });
     } catch (error) {
       wx.showToast({ title: error.message || '提交失败', icon: 'none' });

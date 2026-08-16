@@ -11,5 +11,6 @@ App({
     user: null,
     loginPromise: null,
     selectedTemplate: null,
+    sourcePublicationId: '',
   },
 });

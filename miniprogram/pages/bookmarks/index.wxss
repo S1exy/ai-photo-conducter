@@ -1,0 +1,9 @@
+.bookmarks-page { padding-top: 36rpx; }
+.section-title { margin-bottom: 20rpx; font-size: 34rpx; font-weight: 700; }
+.template-title { margin-top: 46rpx; }
+.empty { padding: 34rpx 0; color: #7a867f; }
+.work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
+.work { overflow: hidden; border-radius: 22rpx; background: white; }
+.work image { width: 100%; height: 300rpx; display: block; }
+.work text { display: block; padding: 18rpx; font-size: 24rpx; }
+.template { display: flex; justify-content: space-between; margin-bottom: 12rpx; padding: 26rpx; border-radius: 20rpx; background: white; }

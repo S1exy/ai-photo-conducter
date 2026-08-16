@@ -1,0 +1,14 @@
+<view class="page-shell bookmarks-page">
+  <view class="section-title">收藏的作品</view>
+  <view wx:if="{{!works.length}}" class="empty">还没有收藏作品</view>
+  <view class="work-grid">
+    <view wx:for="{{works}}" wx:key="id" class="work" data-id="{{item.id}}" bindtap="openWork">
+      <image src="{{item.imagePath}}" mode="aspectFill"></image><text>{{item.templateName}}</text>
+    </view>
+  </view>
+  <view class="section-title template-title">收藏的模板</view>
+  <view wx:if="{{!templates.length}}" class="empty">还没有收藏模板</view>
+  <view wx:for="{{templates}}" wx:key="id" class="template" data-id="{{item.id}}" bindtap="openTemplate">
+    <text>{{item.name}}</text><text>›</text>
+  </view>
+</view>

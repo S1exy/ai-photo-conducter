@@ -12,7 +12,7 @@
   </view>
   <view class="profile-menu">
     <view class="profile-row" bindtap="openWorks"><text>我的作品</text><text>›</text></view>
-    <view class="profile-row"><text>我的收藏</text><text>›</text></view>
+    <view class="profile-row" bindtap="openBookmarks"><text>我的收藏</text><text>›</text></view>
     <view class="profile-row"><text>内容规范</text><text>›</text></view>
   </view>
 </view>

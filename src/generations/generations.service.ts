@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AssetKind, CreationStatus, GenerationStatus, SafetyStatus, TemplateStatus, TemplateVersionStatus } from '../generated/prisma/enums';
+import { AssetKind, CreationStatus, GenerationStatus, PublicationStatus, SafetyStatus, TemplateStatus, TemplateVersionStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { STORAGE_ADAPTER, StorageAdapter } from '../storage/storage.port';
 import { AssetsService } from '../assets/assets.service';
@@ -33,6 +33,19 @@ export class GenerationsService {
       include: { template: true },
     });
     if (!version) throw new NotFoundException('Template version not found');
+    if (!version.template.generationEnabled) {
+      throw new UnprocessableEntityException('Template generation is disabled');
+    }
+    if (input.sourcePublicationId) {
+      const source = await this.prisma.publication.findFirst({
+        where: {
+          id: input.sourcePublicationId,
+          status: PublicationStatus.PUBLISHED,
+          templateVersionId: version.id,
+        },
+      });
+      if (!source) throw new NotFoundException('Source publication not found');
+    }
 
     const asset = await this.prisma.asset.findFirst({
       where: { id: input.inputAssetId, createdByUserId: userId, kind: AssetKind.USER_INPUT, deletedAt: null },
@@ -51,6 +64,7 @@ export class GenerationsService {
         templateId: version.templateId,
         templateVersionId: version.id,
         inputAssetId: asset.id,
+        sourcePublicationId: input.sourcePublicationId,
         aspectRatio: input.aspectRatio,
         provider: this.config.get<string>('MODEL_PROVIDER', 'mock'),
         status: GenerationStatus.QUEUED,

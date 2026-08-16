@@ -1,0 +1,13 @@
+.work-loading { padding: 180rpx 0; color: #7a867f; text-align: center; }
+.work-detail { min-height: 100vh; background: #f7f9f6; }
+.hero-image { width: 100%; min-height: 520rpx; display: block; background: #e8ece9; }
+.work-content { padding: 28rpx 24rpx 60rpx; }
+.author-row { display: flex; justify-content: space-between; align-items: center; font-weight: 650; }
+.author-row .muted { font-size: 21rpx; font-weight: 400; }
+.template-card { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 28rpx; padding: 24rpx; border-radius: 24rpx; background: white; }
+.template-name { margin-bottom: 8rpx; font-size: 29rpx; font-weight: 650; }
+.template-card button { margin: 0; padding: 0 26rpx; border-radius: 999rpx; background: #174d3b; color: white; font-size: 23rpx; }
+.action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12rpx; margin-top: 24rpx; }
+.action { padding: 16rpx 4rpx; border-radius: 18rpx; background: white; color: #5d6b64; font-size: 22rpx; line-height: 1.3; }
+.action.active { background: #e1eee7; color: #174d3b; }
+.action.report { color: #9a4b3f; }

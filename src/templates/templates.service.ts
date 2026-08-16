@@ -8,7 +8,7 @@ export class TemplatesService {
 
   async list() {
     const templates = await this.prisma.template.findMany({
-      where: { status: TemplateStatus.ACTIVE, deletedAt: null },
+      where: { status: TemplateStatus.ACTIVE, catalogVisible: true, deletedAt: null },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
       include: {
         versions: {
@@ -40,7 +40,7 @@ export class TemplatesService {
     return this.mapTemplate(template, version);
   }
 
-  private mapTemplate(template: { id: string; name: string }, version: {
+  private mapTemplate(template: { id: string; name: string; catalogVisible: boolean; generationEnabled: boolean }, version: {
     id: string;
     versionNumber: number;
     inputSchema: unknown;
@@ -55,6 +55,8 @@ export class TemplatesService {
       versionId: version.id,
       versionNumber: version.versionNumber,
       usageCount: 0,
+      catalogVisible: template.catalogVisible,
+      generationEnabled: template.generationEnabled,
       inputCount: 1,
       ratios: Array.isArray(output.ratios) ? output.ratios : ['1:1'],
       artClass: typeof render.artClass === 'string' ? render.artClass : 'editorial',

@@ -1,0 +1,17 @@
+<view wx:if="{{loading}}" class="work-loading">正在加载作品…</view>
+<view wx:else class="work-detail">
+  <image class="hero-image" src="{{work.imagePath}}" mode="widthFix"></image>
+  <view class="work-content">
+    <view class="author-row"><text>{{work.author}}</text><text class="muted">{{work.publishedAt}}</text></view>
+    <view class="template-card" bindtap="useSame">
+      <view><view class="template-name">{{work.templateName}}</view><view class="muted">固定官方模板 · {{work.sameTemplateUses}} 次同款创作</view></view>
+      <button disabled="{{!work.generationEnabled}}">{{work.generationEnabled ? '使用同款' : '暂不可用'}}</button>
+    </view>
+    <view class="action-row">
+      <button class="action {{work.liked ? 'active' : ''}}" bindtap="toggleLike">♡ {{work.likes}}</button>
+      <button class="action {{work.bookmarked ? 'active' : ''}}" bindtap="toggleBookmark">收藏 {{work.bookmarks}}</button>
+      <button class="action" open-type="share">分享</button>
+      <button class="action report" bindtap="report">举报</button>
+    </view>
+  </view>
+</view>

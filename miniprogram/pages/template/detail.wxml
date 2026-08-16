@@ -14,6 +14,7 @@
     </view>
   </view>
   <view class="detail-footer">
-    <button class="primary-button" bindtap="useTemplate">使用这个模板</button>
+    <button class="bookmark-button" bindtap="toggleBookmark">{{bookmarked ? '已收藏' : '收藏'}}</button>
+    <button class="primary-button" disabled="{{!template.generationEnabled}}" bindtap="useTemplate">{{template.generationEnabled ? '使用这个模板' : '模板暂不可用'}}</button>
   </view>
 </view>

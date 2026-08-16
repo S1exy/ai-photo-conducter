@@ -5,6 +5,8 @@
     "pages/tasks/index",
     "pages/profile/index",
     "pages/works/index",
+    "pages/work/detail",
+    "pages/bookmarks/index",
     "pages/template/detail"
   ],
   "window": {

@@ -142,23 +142,25 @@ model User {
 }
 
 model Template {
-  id             String             @id @default(uuid()) @db.Uuid
-  ownerUserId    String?            @map("owner_user_id") @db.Uuid
-  name           String             @db.VarChar(80)
-  coverAssetId   String?            @map("cover_asset_id") @db.Uuid
-  status         TemplateStatus     @default(DRAFT)
-  sortOrder      Int                @default(0) @map("sort_order")
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
-  deletedAt      DateTime?          @map("deleted_at")
-  owner          User?              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
-  coverAsset     Asset?             @relation("TemplateCover", fields: [coverAssetId], references: [id], onDelete: SetNull)
-  versions       TemplateVersion[]
-  generationJobs GenerationJob[]
-  creations      Creation[]
-  publications   Publication[]
-  bookmarks      TemplateBookmark[]
-  reports        Report[]
+  id                String             @id @default(uuid()) @db.Uuid
+  ownerUserId       String?            @map("owner_user_id") @db.Uuid
+  name              String             @db.VarChar(80)
+  coverAssetId      String?            @map("cover_asset_id") @db.Uuid
+  status            TemplateStatus     @default(DRAFT)
+  catalogVisible    Boolean            @default(true) @map("catalog_visible")
+  generationEnabled Boolean            @default(true) @map("generation_enabled")
+  sortOrder         Int                @default(0) @map("sort_order")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  deletedAt         DateTime?          @map("deleted_at")
+  owner             User?              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  coverAsset        Asset?             @relation("TemplateCover", fields: [coverAssetId], references: [id], onDelete: SetNull)
+  versions          TemplateVersion[]
+  generationJobs    GenerationJob[]
+  creations         Creation[]
+  publications      Publication[]
+  bookmarks         TemplateBookmark[]
+  reports           Report[]
 
   @@index([status, sortOrder, createdAt(sort: Desc)])
   @@index([ownerUserId, status])
@@ -219,40 +221,43 @@ model Asset {
 }
 
 model GenerationJob {
-  id                 String           @id @default(uuid()) @db.Uuid
-  userId             String           @map("user_id") @db.Uuid
-  templateId         String           @map("template_id") @db.Uuid
-  templateVersionId  String           @map("template_version_id") @db.Uuid
-  inputAssetId       String           @map("input_asset_id") @db.Uuid
-  outputAssetId      String?          @map("output_asset_id") @db.Uuid
-  sourceJobId        String?          @map("source_job_id") @db.Uuid
-  aspectRatio        String           @map("aspect_ratio") @db.VarChar(16)
-  provider           String           @default("mock") @db.VarChar(40)
-  providerJobId      String?          @map("provider_job_id") @db.VarChar(200)
-  status             GenerationStatus @default(CREATED)
-  attempt            Int              @default(0)
-  idempotencyKey     String           @unique @map("idempotency_key") @db.VarChar(128)
-  billingEnabled     Boolean          @default(false) @map("billing_enabled")
-  pointsCostSnapshot Int              @default(0) @map("points_cost_snapshot")
-  failureCode        String?          @map("failure_code") @db.VarChar(64)
-  createdAt          DateTime         @default(now()) @map("created_at")
-  startedAt          DateTime?        @map("started_at")
-  finishedAt         DateTime?        @map("finished_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  user               User             @relation(fields: [userId], references: [id], onDelete: Restrict)
-  template           Template         @relation(fields: [templateId], references: [id], onDelete: Restrict)
-  templateVersion    TemplateVersion  @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
-  inputAsset         Asset            @relation("GenerationInput", fields: [inputAssetId], references: [id], onDelete: Restrict)
-  outputAsset        Asset?           @relation("GenerationOutput", fields: [outputAssetId], references: [id], onDelete: Restrict)
-  sourceJob          GenerationJob?   @relation("RegenerationChain", fields: [sourceJobId], references: [id], onDelete: Restrict)
-  regeneratedJobs    GenerationJob[]  @relation("RegenerationChain")
-  creation           Creation?
-  pointTransactions  PointLedger[]
+  id                  String           @id @default(uuid()) @db.Uuid
+  userId              String           @map("user_id") @db.Uuid
+  templateId          String           @map("template_id") @db.Uuid
+  templateVersionId   String           @map("template_version_id") @db.Uuid
+  inputAssetId        String           @map("input_asset_id") @db.Uuid
+  outputAssetId       String?          @map("output_asset_id") @db.Uuid
+  sourceJobId         String?          @map("source_job_id") @db.Uuid
+  sourcePublicationId String?          @map("source_publication_id") @db.Uuid
+  aspectRatio         String           @map("aspect_ratio") @db.VarChar(16)
+  provider            String           @default("mock") @db.VarChar(40)
+  providerJobId       String?          @map("provider_job_id") @db.VarChar(200)
+  status              GenerationStatus @default(CREATED)
+  attempt             Int              @default(0)
+  idempotencyKey      String           @unique @map("idempotency_key") @db.VarChar(128)
+  billingEnabled      Boolean          @default(false) @map("billing_enabled")
+  pointsCostSnapshot  Int              @default(0) @map("points_cost_snapshot")
+  failureCode         String?          @map("failure_code") @db.VarChar(64)
+  createdAt           DateTime         @default(now()) @map("created_at")
+  startedAt           DateTime?        @map("started_at")
+  finishedAt          DateTime?        @map("finished_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  user                User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  template            Template         @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion     TemplateVersion  @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  inputAsset          Asset            @relation("GenerationInput", fields: [inputAssetId], references: [id], onDelete: Restrict)
+  outputAsset         Asset?           @relation("GenerationOutput", fields: [outputAssetId], references: [id], onDelete: Restrict)
+  sourceJob           GenerationJob?   @relation("RegenerationChain", fields: [sourceJobId], references: [id], onDelete: Restrict)
+  sourcePublication   Publication?     @relation("GenerationSourcePublication", fields: [sourcePublicationId], references: [id], onDelete: SetNull)
+  regeneratedJobs     GenerationJob[]  @relation("RegenerationChain")
+  creation            Creation?
+  pointTransactions   PointLedger[]
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([status, updatedAt])
   @@index([templateVersionId, createdAt(sort: Desc)])
   @@index([provider, providerJobId])
+  @@index([sourcePublicationId, createdAt(sort: Desc)])
   @@map("generation_jobs")
 }
 
@@ -285,28 +290,29 @@ model Creation {
 }
 
 model Publication {
-  id                 String              @id @default(uuid()) @db.Uuid
-  creationId         String              @unique @map("creation_id") @db.Uuid
-  userId             String              @map("user_id") @db.Uuid
-  templateId         String              @map("template_id") @db.Uuid
-  templateVersionId  String              @map("template_version_id") @db.Uuid
-  status             PublicationStatus   @default(PENDING_REVIEW)
-  reviewReasonCode   String?             @map("review_reason_code") @db.VarChar(64)
-  reviewedByUserId   String?             @map("reviewed_by_user_id") @db.Uuid
-  reviewedAt         DateTime?           @map("reviewed_at")
-  publishedAt        DateTime?           @map("published_at")
-  withdrawnAt        DateTime?           @map("withdrawn_at")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  creation           Creation            @relation(fields: [creationId], references: [id], onDelete: Restrict)
-  user               User                @relation("PublicationOwner", fields: [userId], references: [id], onDelete: Restrict)
-  reviewedBy         User?               @relation("PublicationReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-  template           Template            @relation(fields: [templateId], references: [id], onDelete: Restrict)
-  templateVersion    TemplateVersion     @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
-  likes              WorkLike[]
-  bookmarks          WorkBookmark[]
-  reports            Report[]
-  moderationRequests ModerationRequest[]
+  id                    String              @id @default(uuid()) @db.Uuid
+  creationId            String              @unique @map("creation_id") @db.Uuid
+  userId                String              @map("user_id") @db.Uuid
+  templateId            String              @map("template_id") @db.Uuid
+  templateVersionId     String              @map("template_version_id") @db.Uuid
+  status                PublicationStatus   @default(PENDING_REVIEW)
+  reviewReasonCode      String?             @map("review_reason_code") @db.VarChar(64)
+  reviewedByUserId      String?             @map("reviewed_by_user_id") @db.Uuid
+  reviewedAt            DateTime?           @map("reviewed_at")
+  publishedAt           DateTime?           @map("published_at")
+  withdrawnAt           DateTime?           @map("withdrawn_at")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+  creation              Creation            @relation(fields: [creationId], references: [id], onDelete: Restrict)
+  user                  User                @relation("PublicationOwner", fields: [userId], references: [id], onDelete: Restrict)
+  reviewedBy            User?               @relation("PublicationReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  template              Template            @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion       TemplateVersion     @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  likes                 WorkLike[]
+  bookmarks             WorkBookmark[]
+  reports               Report[]
+  moderationRequests    ModerationRequest[]
+  sourcedGenerationJobs GenerationJob[]     @relation("GenerationSourcePublication")
 
   @@index([status, publishedAt(sort: Desc), id])
   @@index([templateId, status, publishedAt(sort: Desc)])

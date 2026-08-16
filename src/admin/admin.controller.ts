@@ -41,6 +41,16 @@ export class AdminController {
     return this.admin.listReports();
   }
 
+  @Post('reports/:id/dismiss')
+  dismissReport(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.admin.dismissReport(id);
+  }
+
+  @Post('reports/:id/remove-publication')
+  removeReportedPublication(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.admin.removeReportedPublication(id);
+  }
+
   @Get('assets/:id/file')
   async file(@Param('id', new ParseUUIDPipe()) id: string, @Res() response: Response): Promise<void> {
     const { asset, stream } = await this.assets.getFileById(id);

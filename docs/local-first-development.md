@@ -22,6 +22,7 @@ npm run typecheck
 npm run build
 npm run test:smoke
 npm run test:review-smoke
+npm run test:engagement-smoke
 ```
 
 还需要在微信开发者工具中走通“生成 → 私人作品 → 申请发布 → 后台审核 → 公开流”。

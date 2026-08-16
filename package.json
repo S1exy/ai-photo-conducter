@@ -12,6 +12,7 @@
     "db:start:local": "node scripts/start-local-postgres.mjs",
     "test:smoke": "node scripts/e2e-smoke.mjs",
     "test:review-smoke": "node --env-file=.env scripts/review-smoke.mjs",
+    "test:engagement-smoke": "node --env-file=.env scripts/engagement-smoke.mjs",
     "prod:preflight": "node --env-file=.env scripts/prod-preflight.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
