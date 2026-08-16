@@ -1,6 +1,6 @@
 # AI 图片模板小程序
 
-模板驱动的微信原生小程序与 NestJS API MVP。小程序已接通登录、模板、图片上传、异步生成和任务轮询。当前生成适配器会复制输入图作为 Mock 输出，审核为 Mock，积分功能关闭；真实模型、审核供应商和 AppID 后续接入。
+模板驱动的微信原生小程序与 NestJS API MVP。小程序已接通登录、模板、图片上传、异步生成、私人作品、人工发布审核、公开流和任务轮询。当前生成适配器会复制输入图作为 Mock 输出，积分功能关闭；真实模型、自动审核供应商和 AppID 后续接入。
 
 ## 技术栈
 
@@ -47,7 +47,10 @@ npm run db:start:local
 
 ```bash
 npm run test:smoke
+npm run test:review-smoke
 ```
+
+本地运营审核后台：`http://127.0.0.1:3000/admin/`。使用 `.env` 中的 `ADMIN_LOCAL_PASSWORD` 登录；该入口只在开发登录开启时可用。
 
 检查接口：
 
@@ -59,6 +62,10 @@ GET /api/v1/templates
 POST /api/v1/assets/images
 POST /api/v1/generations
 GET /api/v1/generations
+GET /api/v1/creations
+POST /api/v1/creations/:id/publication
+GET /api/v1/publications/feed
+GET /api/v1/admin/reviews
 ```
 
 `ready` 会同时检查 PostgreSQL 和本地存储目录是否可用。
@@ -77,6 +84,10 @@ GET /api/v1/generations
 - 作品默认是私人草稿，审核通过后才能进入公开流。
 - `BILLING_ENABLED=false` 时积分不参与任务校验或扣除。
 - `MODEL_PROVIDER=mock` 和 `MODERATION_PROVIDER=mock` 仅供主体开发。
+
+## 开发与上线策略
+
+当前采用“本地完成主体，最后一次性迁移到正式服务器”的方式。详细冻结条件、迁移顺序和回滚原则见 [本地优先开发计划](docs/local-first-development.md)。
 
 ## 本地磁盘注意事项
 

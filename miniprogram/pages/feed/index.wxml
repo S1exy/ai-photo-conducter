@@ -16,6 +16,8 @@
 
   <view wx:if="{{loading}}" class="feed-empty">正在加载作品…</view>
 
+  <view wx:elif="{{!works.length}}" class="feed-empty">还没有公开作品，去生成第一张吧。</view>
+
   <view wx:else class="waterfall">
     <view
       wx:for="{{works}}"
@@ -24,8 +26,8 @@
       data-template-id="{{item.templateId}}"
       bindtap="openTemplate"
     >
-      <view class="work-art {{item.template.artClass}} {{item.heightClass}}"></view>
-      <view class="template-line">▦ {{item.template.name}}</view>
+      <image class="work-art {{item.heightClass}}" src="{{item.imagePath}}" mode="aspectFill"></image>
+      <view class="template-line">▦ {{item.templateName}}</view>
       <view class="work-meta">
         <text>{{item.author}}</text>
         <text>♡ {{item.likes}}</text>

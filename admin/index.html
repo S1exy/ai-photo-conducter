@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>灵感接力 · 运营审核台</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">LOCAL OPERATIONS</p>
+          <h1>内容审核台</h1>
+          <p class="subtitle">查看原始参考图和生成结果，决定作品是否进入公开流。</p>
+        </div>
+        <div class="environment"><span></span> 本地开发环境</div>
+      </header>
+
+      <section id="loginPanel" class="login-panel">
+        <div>
+          <p class="eyebrow">OPERATOR ACCESS</p>
+          <h2>运营人员登录</h2>
+          <p>输入本地管理员密码。凭据只保存在当前浏览器会话中。</p>
+        </div>
+        <form id="loginForm">
+          <label for="password">本地管理员密码</label>
+          <div class="login-row">
+            <input id="password" type="password" minlength="8" autocomplete="current-password" required />
+            <button type="submit">进入审核台</button>
+          </div>
+          <p id="loginError" class="error" role="alert"></p>
+        </form>
+      </section>
+
+      <section id="workspace" class="workspace hidden">
+        <nav class="tabs" aria-label="审核状态">
+          <button class="tab active" data-status="PENDING_REVIEW">待审核</button>
+          <button class="tab" data-status="PUBLISHED">已公开</button>
+          <button class="tab" data-status="REJECTED">未通过</button>
+          <button class="tab" data-status="WITHDRAWN">已撤回</button>
+          <button id="refreshButton" class="refresh">刷新</button>
+          <button id="logoutButton" class="logout">退出</button>
+        </nav>
+        <div class="summary">
+          <div><span id="itemCount">0</span><small>当前记录</small></div>
+          <p id="statusHint">等待运营人员审核的发布申请</p>
+        </div>
+        <div id="reviewList" class="review-list"></div>
+        <div id="emptyState" class="empty hidden">
+          <div class="empty-mark">◇</div>
+          <h3>当前没有记录</h3>
+          <p>新的发布申请会自动出现在这里。</p>
+        </div>
+      </section>
+    </main>
+    <script src="/admin/app.js"></script>
+  </body>
+</html>

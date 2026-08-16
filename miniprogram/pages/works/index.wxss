@@ -1,0 +1,17 @@
+.works-page { padding-top: 38rpx; }
+.works-head { margin-bottom: 28rpx; }
+.works-title { margin-bottom: 8rpx; font-size: 40rpx; font-weight: 700; }
+.works-empty { padding: 140rpx 0; color: #7a867f; text-align: center; }
+.works-list { display: grid; gap: 22rpx; }
+.work-item { overflow: hidden; border-radius: 28rpx; background: white; }
+.work-item > image { width: 100%; height: 520rpx; display: block; }
+.work-body { padding: 24rpx; }
+.work-row { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }
+.work-name { font-size: 29rpx; font-weight: 650; }
+.status { padding: 8rpx 14rpx; border-radius: 999rpx; background: #eef3ef; color: #50655a; font-size: 21rpx; }
+.status.PUBLISHED { background: #dfeee7; color: #174d3b; }
+.status.REJECTED, .status.REMOVED { background: #f7e7e2; color: #9f4638; }
+.reject-reason { margin-top: 18rpx; padding: 16rpx; border-radius: 16rpx; background: #fff4f0; color: #9f4638; font-size: 22rpx; }
+.publish-button, .withdraw-button { margin-top: 22rpx; border-radius: 999rpx; font-size: 25rpx; }
+.publish-button { background: #174d3b; color: white; }
+.withdraw-button { border: 2rpx solid #d9e1db; background: white; color: #5f6e66; }

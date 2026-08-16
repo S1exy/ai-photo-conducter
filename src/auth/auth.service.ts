@@ -1,8 +1,8 @@
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserStatus } from '../generated/prisma/enums';
+import { UserRole, UserStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface WechatSessionResponse {
@@ -46,6 +46,34 @@ export class AuthService {
         nickname: user.systemNickname,
         role: user.role,
       },
+    };
+  }
+
+  async localAdminLogin(password: string) {
+    if (!this.config.get<boolean>('DEV_LOGIN_ENABLED')) {
+      throw new UnauthorizedException('Local admin login is disabled');
+    }
+    const expected = this.config.get<string>('ADMIN_LOCAL_PASSWORD', '');
+    const suppliedBuffer = Buffer.from(password);
+    const expectedBuffer = Buffer.from(expected);
+    if (!expected || suppliedBuffer.length !== expectedBuffer.length || !timingSafeEqual(suppliedBuffer, expectedBuffer)) {
+      throw new UnauthorizedException('Invalid local admin password');
+    }
+
+    const user = await this.prisma.user.upsert({
+      where: { openid: 'local_admin' },
+      update: { role: UserRole.ADMIN, status: UserStatus.ACTIVE },
+      create: {
+        openid: 'local_admin',
+        systemNickname: '运营管理员',
+        role: UserRole.ADMIN,
+      },
+      select: { id: true, systemNickname: true, role: true },
+    });
+    return {
+      accessToken: await this.jwt.signAsync({ sub: user.id }),
+      expiresIn: 8 * 60 * 60,
+      user: { id: user.id, nickname: user.systemNickname, role: user.role },
     };
   }
 

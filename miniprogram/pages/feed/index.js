@@ -1,4 +1,4 @@
-const mock = require('../../services/mock');
+const api = require('../../services/api');
 
 Page({
   data: {
@@ -18,8 +18,17 @@ Page({
 
   async loadFeed() {
     this.setData({ loading: true });
-    const works = await mock.getFeed();
-    this.setData({ works, loading: false });
+    try {
+      const heights = ['tall', 'short', 'medium'];
+      const works = (await api.getFeed()).map((work, index) => ({
+        ...work,
+        heightClass: heights[index % heights.length],
+      }));
+      this.setData({ works, loading: false });
+    } catch (error) {
+      this.setData({ works: [], loading: false });
+      wx.showToast({ title: error.message || '作品加载失败', icon: 'none' });
+    }
   },
 
   selectTab(event) {

@@ -53,6 +53,12 @@ export class AssetsService {
     return { asset, stream: await this.storage.get(asset.storageKey) };
   }
 
+  async getFileById(assetId: string) {
+    const asset = await this.prisma.asset.findFirst({ where: { id: assetId, deletedAt: null } });
+    if (!asset) throw new NotFoundException('Asset not found');
+    return { asset, stream: await this.storage.get(asset.storageKey) };
+  }
+
   mapAsset(asset: { id: string; mimeType: string; byteSize: bigint; safetyStatus: SafetyStatus }, token: string) {
     return {
       id: asset.id,

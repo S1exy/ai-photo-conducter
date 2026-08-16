@@ -1,4 +1,4 @@
-const api = 'http://127.0.0.1:3000/api/v1';
+const api = process.env.SMOKE_API_BASE || 'http://127.0.0.1:3000/api/v1';
 
 async function json(response) {
   const body = await response.json();

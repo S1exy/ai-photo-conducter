@@ -1,0 +1,22 @@
+<view class="page-shell works-page">
+  <view class="works-head">
+    <view class="works-title">我的作品</view>
+    <view class="muted">生成结果默认只有你自己可见</view>
+  </view>
+  <view wx:if="{{loading}}" class="works-empty">正在加载作品…</view>
+  <view wx:elif="{{!creations.length}}" class="works-empty">还没有作品，先去创作一张吧。</view>
+  <view wx:else class="works-list">
+    <view wx:for="{{creations}}" wx:key="id" class="work-item">
+      <image src="{{item.outputFilePath}}" mode="aspectFill"></image>
+      <view class="work-body">
+        <view class="work-row">
+          <view class="work-name">{{item.templateName}}</view>
+          <view class="status {{item.status}}">{{item.statusLabel}}</view>
+        </view>
+        <view wx:if="{{item.publication.reviewReasonCode}}" class="reject-reason">未通过原因：{{item.publication.reviewReasonCode}}</view>
+        <button wx:if="{{item.canPublish}}" class="publish-button" data-id="{{item.id}}" loading="{{submittingId === item.id}}" bindtap="publish">申请发布</button>
+        <button wx:if="{{item.canWithdraw}}" class="withdraw-button" data-id="{{item.publication.id}}" bindtap="withdraw">停止公开</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -4,6 +4,7 @@
     "pages/create/index",
     "pages/tasks/index",
     "pages/profile/index",
+    "pages/works/index",
     "pages/template/detail"
   ],
   "window": {

@@ -17,9 +17,11 @@ export function validateEnvironment(config: Environment): Environment {
   return {
     ...config,
     PORT: port,
+    PUBLIC_API_ORIGIN: String(config.PUBLIC_API_ORIGIN ?? `http://127.0.0.1:${port}`),
     DATABASE_URL: requiredString(config, 'DATABASE_URL'),
     STORAGE_ROOT: requiredString(config, 'STORAGE_ROOT'),
     AUTH_SECRET: requiredString(config, 'AUTH_SECRET'),
+    ADMIN_LOCAL_PASSWORD: String(config.ADMIN_LOCAL_PASSWORD ?? ''),
     WECHAT_APPID: String(config.WECHAT_APPID ?? ''),
     WECHAT_SECRET: String(config.WECHAT_SECRET ?? ''),
     BILLING_ENABLED: String(config.BILLING_ENABLED ?? 'false') === 'true',

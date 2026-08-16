@@ -96,4 +96,21 @@ module.exports = {
       outputFilePath: absoluteUrl(job.outputFilePath),
     }));
   },
+  async getCreations() {
+    const creations = await authorizedRequest({ url: '/creations' });
+    return creations.map((creation) => ({
+      ...creation,
+      outputFilePath: absoluteUrl(creation.outputFilePath),
+    }));
+  },
+  submitPublication(creationId) {
+    return authorizedRequest({ url: `/creations/${creationId}/publication`, method: 'POST' });
+  },
+  withdrawPublication(publicationId) {
+    return authorizedRequest({ url: `/publications/${publicationId}/withdraw`, method: 'POST' });
+  },
+  async getFeed() {
+    const works = await request({ url: '/publications/feed' });
+    return works.map((work) => ({ ...work, imagePath: absoluteUrl(work.imagePath) }));
+  },
 };
